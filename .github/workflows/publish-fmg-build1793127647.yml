@@ -1,0 +1,67 @@
+name: Publish FMGWorld build 1793127647 patch 4
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/publish-fmg-build1793127647.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-fmgworld-channel
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Read versioned public inputs without signing keys
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in delta.zip.b64 merge_payload.py update.json; do
+            gh api "repos/$GITHUB_REPOSITORY/contents/updates/fmgworld-build1793127647/$file?ref=$GITHUB_SHA" --jq .content | base64 --decode > "$file"
+          done
+          base64 --decode delta.zip.b64 > delta.zip
+          mkdir base
+          gh release download fmgworld-patch-v1 --pattern payload.zip --dir base
+          python3 merge_payload.py base/payload.zip delta.zip payload.zip
+          python3 - <<'PY'
+          import base64,hashlib,json
+          from pathlib import Path
+          data=json.loads(base64.b64decode(json.loads(Path('update.json').read_text())['signed_data']))
+          assert data['game']=='fmgworld' and data['version']==4
+          assert data['source_sha256']=='2af666973fb8c3d815ca66226a8fedb607494cc0b38234ba588c2aff71600958'
+          blob=Path('payload.zip').read_bytes()
+          assert len(blob)==data['patch_size'] and hashlib.sha256(blob).hexdigest()==data['patch_sha256']
+          Path('update-readable.json').write_text(json.dumps(data,ensure_ascii=False,indent=2))
+          PY
+      - name: Publish immutable-version files before advancing the channel
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag=fmgworld-patch-v4
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            gh release create "$tag" payload.zip update.json update-readable.json --draft --title 'FMGWorld 0.2.1 新原包汉化更新4' --notes '适配官方 build1793127647；合并新版战斗、物品和地图修复，补译收银员任务。下载补丁后选择对应新原版APK重新生成并覆盖安装中文版。存档建议先备份；本次不是工具本体升级。'
+          else
+            gh release upload "$tag" payload.zip update.json update-readable.json --clobber
+          fi
+          gh release edit "$tag" --draft=false --latest
+      - name: Advance existing FMG channel and retain previous manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          channel=fmgworld-test-v3
+          mkdir check-before
+          if gh release download "$channel" --pattern update.json --dir check-before; then
+            if cmp -s update.json check-before/update.json; then exit 0; fi
+            id=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$channel" --jq '.assets[] | select(.name=="update.json") | .id')
+            test -n "$id"
+            gh api --method PATCH "repos/$GITHUB_REPOSITORY/releases/assets/$id" -f name="update-before-v4-$id.json" >/dev/null
+          fi
+          gh release upload "$channel" update.json
+          gh release edit "$channel" --title 'FMGWorld 更新通道 · 新原包适配4'
+          mkdir check-after
+          gh release download "$channel" --pattern update.json --dir check-after
+          cmp update.json check-after/update.json
