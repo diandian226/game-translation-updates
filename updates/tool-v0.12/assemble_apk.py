@@ -24,6 +24,7 @@ def assemble(base,delta,output):
     assert hashlib.sha256(Path(output).read_bytes()).hexdigest()==recipe['target_sha256']
     with zipfile.ZipFile(output) as z:
         assert z.testzip() is None
+        assert all('\\' not in i.orig_filename for i in z.infolist())
         for game in ['fmgworld','outgrow']:
             assert z.read('assets/catalog-'+game+'.json')==z.read('assets/catalogs/'+game+'.json')
     print('SIGNED_APK_RECONSTRUCTED_EXACTLY',recipe['target_sha256'])
