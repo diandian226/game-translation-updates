@@ -1,0 +1,66 @@
+# APK asset paths verified from raw ZIP headers on Windows and Linux.
+name: Publish translation tool 0.15 and enable app updates
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/publish-tool-v015.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-translation-tool
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Reconstruct exact locally signed APK without private keys
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in delta.part0.b64 assemble_apk.py tool-update.json; do
+            gh api "repos/$GITHUB_REPOSITORY/contents/updates/tool-v0.15/$file?ref=$GITHUB_SHA" --jq .content | base64 --decode > "$file"
+          done
+          base64 --decode delta.part0.b64 > delta.zip
+          mkdir base
+          gh release download tool-v0.12 --pattern Game-Translator-0.12.apk --dir base
+          python3 assemble_apk.py base/Game-Translator-0.12.apk delta.zip Game-Translator-0.15.apk
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          meta=json.loads(Path('tool-update.json').read_text())
+          apk=Path('Game-Translator-0.15.apk').read_bytes()
+          assert meta['package_name']=='cn.fmg.patcher' and meta['version_code']==15
+          assert len(apk)==meta['size'] and hashlib.sha256(apk).hexdigest()==meta['sha256']
+          PY
+      - name: Publish tool release without changing game latest channel
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! gh release view tool-v0.15 >/dev/null 2>&1; then
+            gh release create tool-v0.15 Game-Translator-0.15.apk --draft --title '游戏汉化工具 0.15 本机导入修复版' --notes '改进部分手机本机导入无响应：启动自动检查不锁定按钮，直接读取安装包并尝试公共安装路径，显示复制进度；无法读取时提供手动选择完整官方APK入口。16项导入、24项报告与10项目录检查通过；具体OEM手机兼容效果待验证。覆盖安装旧版，无需卸载。'
+          else
+            gh release upload tool-v0.15 Game-Translator-0.15.apk --clobber
+          fi
+          gh release edit tool-v0.15 --draft=false --prerelease --latest=false
+      - name: Publish app-update channel only after APK is downloadable
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! sha=$(gh api "repos/$GITHUB_REPOSITORY/contents/tool-update.json?ref=main" --jq .sha 2>/dev/null); then sha=""; fi
+          if [ -n "$sha" ]; then
+            gh api "repos/$GITHUB_REPOSITORY/contents/tool-update.json?ref=main" --jq .content | base64 --decode > previous-tool-update.json
+            python3 - <<'PY'
+          import json
+          from pathlib import Path
+          assert json.loads(Path('previous-tool-update.json').read_text())['version_code']<=15,'Newer tool release already published'
+          PY
+          fi
+          arguments=()
+          if [ -n "$sha" ]; then arguments=(-f "sha=$sha"); fi
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/tool-update.json" -f message='Enable verified tool 0.15 update channel' -f "content=$(base64 -w0 tool-update.json)" "${arguments[@]}" >/dev/null
+          gh api "repos/$GITHUB_REPOSITORY/contents/tool-update.json?ref=main" --jq .content | base64 --decode > verified-channel.json
+          cmp tool-update.json verified-channel.json
