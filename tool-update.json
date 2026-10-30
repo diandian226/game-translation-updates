@@ -1,9 +1,9 @@
 {
   "package_name": "cn.fmg.patcher",
-  "version_code": 13,
-  "version_name": "0.13 更新检测修复版",
-  "size": 31007952,
-  "sha256": "8f2e30a45a5889d3fd080999734c244e0cafe4a970b1b2879331cfc25011d0f8",
-  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.13/Game-Translator-0.13.apk",
-  "notes": "补丁更新目录增加两个备用入口，联网失败明确显示尚未确认最新，不再用已就绪覆盖错误。内置FMGWorld新旧原包对应的百分号崩溃修复5。覆盖安装工具后重新检查游戏补丁、生成并覆盖安装中文版，无需卸载。"
+  "version_code": 14,
+  "version_name": "0.14 问题报告版",
+  "size": 31016144,
+  "sha256": "5c5235166b9bc74096329150cc6302f98ee6d9fa74b98b1c1ac7e6f6fb7d1a07",
+  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.14/Game-Translator-0.14.apk",
+  "notes": "新增一键导出TXT问题报告并打开系统分享；保留最近操作、版本信息和错误详情。状态监控列出游戏版本、构建号、补丁适配版本及修订号，区分游戏较旧、补丁未适配新版、相同版本不同原包与离线未确认状态。覆盖安装工具即可，无需卸载。分享菜单尚待手机实测。"
 }
