@@ -1,0 +1,108 @@
+name: Publish FMGWorld percent crash fix 5
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/publish-fmg-percent-v5.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-fmgworld-channel
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Reconstruct and validate both original-version patches
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in deltas.part0.b64 deltas.part1.b64 deltas.part2.b64 deltas.part3.b64 deltas.part4.b64 deltas.part5.b64 merge_payload.py update.json update-old.json catalog.json; do
+            gh api "repos/$GITHUB_REPOSITORY/contents/updates/fmgworld-percent-v5/$file?ref=$GITHUB_SHA" --jq .content | base64 --decode > "$file"
+          done
+          cat deltas.part{0..5}.b64 > deltas.zip.b64
+          python3 - <<'PY'
+          import base64,zipfile,io
+          from pathlib import Path
+          with zipfile.ZipFile(io.BytesIO(base64.b64decode(Path('deltas.zip.b64').read_bytes()))) as z:
+              assert set(z.namelist())=={'delta-old.zip','delta-new.zip'}
+              for name in z.namelist(): Path(name).write_bytes(z.read(name))
+          PY
+          mkdir base
+          gh release download fmgworld-patch-v1 --pattern payload.zip --dir base
+          python3 merge_payload.py base/payload.zip delta-old.zip payload-old.zip
+          python3 merge_payload.py base/payload.zip delta-new.zip payload.zip
+          python3 - <<'PY'
+          import base64,hashlib,json,zipfile
+          from pathlib import Path
+          originals=set()
+          for manifest,payload in [('update.json','payload.zip'),('update-old.json','payload-old.zip')]:
+              data=json.loads(base64.b64decode(json.loads(Path(manifest).read_text())['signed_data']))
+              assert data['game']=='fmgworld' and data['version']==5
+              originals.add(data['source_sha256'])
+              blob=Path(payload).read_bytes()
+              assert len(blob)==data['patch_size'] and hashlib.sha256(blob).hexdigest()==data['patch_sha256']
+              with zipfile.ZipFile(payload) as z:
+                  assert all('\\' not in i.orig_filename and not i.orig_filename.startswith('/') and '..' not in i.orig_filename.split('/') for i in z.infolist())
+          assert len(originals)==2
+          cat=json.loads(base64.b64decode(json.loads(Path('catalog.json').read_text())['signed_data']))
+          assert cat['catalog_version']==2 and len(cat['versions'])==2
+          assert {json.loads(base64.b64decode(v['release']['signed_data']))['source_sha256'] for v in cat['versions']}==originals
+          assert all(json.loads(base64.b64decode(v['release']['signed_data']))['version']==5 for v in cat['versions'])
+          PY
+      - name: Publish payloads before activating update channels
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag=fmgworld-patch-v5
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            gh release create "$tag" payload.zip payload-old.zip update.json update-old.json --draft --title 'FMGWorld 汉化修复5 · 百分号崩溃修复' --notes '修复序章第668行及同类23处台词、选项的百分号格式错误。分别提供两个官方0.2.1构建对应补丁，保留原版游戏逻辑差异。工具下载补丁后仍须重新生成中文版并覆盖安装，无需卸载。已通过RenPy8.5.3实际插值测试；尚未在实体安卓手机逐幕游玩验证。'
+          else
+            gh release upload "$tag" payload.zip payload-old.zip update.json update-old.json --clobber
+          fi
+          gh release edit "$tag" --draft=false --latest
+          gh api "repos/$GITHUB_REPOSITORY/releases/tags/$tag" > release.json
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          release=json.loads(Path('release.json').read_text())
+          assert not release['draft']
+          assets={a['name']:a for a in release['assets']}
+          for name in ('payload.zip','payload-old.zip','update.json','update-old.json'):
+              data=Path(name).read_bytes()
+              assert assets[name]['size']==len(data)
+              assert assets[name]['digest']=='sha256:'+hashlib.sha256(data).hexdigest()
+          PY
+      - name: Activate signed multi-version catalogue
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha=$(gh api "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json" --jq .sha)
+          python3 - "$sha" <<'PY'
+          import base64,json,sys
+          from pathlib import Path
+          Path('catalog-request.json').write_text(json.dumps({'message':'Fix FMGWorld percent interpolation crashes for both original builds','branch':'main','sha':sys.argv[1],'content':base64.b64encode(Path('catalog.json').read_bytes()).decode()}))
+          PY
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json" --input catalog-request.json > catalogue-result.json
+          gh api "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json" --jq .content | base64 --decode > catalogue-online.json
+          cmp catalog.json catalogue-online.json
+      - name: Advance legacy channel retaining previous manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          channel=fmgworld-test-v3
+          mkdir check-before check-after
+          if gh release download "$channel" --pattern update.json --dir check-before; then
+            if cmp -s update.json check-before/update.json; then exit 0; fi
+            id=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$channel" --jq '.assets[] | select(.name=="update.json") | .id')
+            test -n "$id"
+            gh api --method PATCH "repos/$GITHUB_REPOSITORY/releases/assets/$id" -f name="update-before-v5-$id.json" >/dev/null
+          fi
+          gh release upload "$channel" update.json
+          gh release edit "$channel" --title 'FMGWorld 更新通道 · 百分号崩溃修复5'
+          gh release download "$channel" --pattern update.json --dir check-after
+          cmp update.json check-after/update.json
+
