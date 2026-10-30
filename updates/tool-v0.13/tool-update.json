@@ -1,0 +1,9 @@
+{
+  "package_name": "cn.fmg.patcher",
+  "version_code": 13,
+  "version_name": "0.13 更新检测修复版",
+  "size": 31007952,
+  "sha256": "8f2e30a45a5889d3fd080999734c244e0cafe4a970b1b2879331cfc25011d0f8",
+  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.13/Game-Translator-0.13.apk",
+  "notes": "补丁更新目录增加两个备用入口，联网失败明确显示尚未确认最新，不再用已就绪覆盖错误。内置FMGWorld新旧原包对应的百分号崩溃修复5。覆盖安装工具后重新检查游戏补丁、生成并覆盖安装中文版，无需卸载。"
+}
