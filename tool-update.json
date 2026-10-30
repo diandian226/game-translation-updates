@@ -1,0 +1,9 @@
+{
+  "package_name": "cn.fmg.patcher",
+  "version_code": 12,
+  "version_name": "0.12 目录修复版",
+  "size": 31007952,
+  "sha256": "addec996ad72ad3082c3c724ac189cced4d981c19c4eb6f4f14092ce3437b3f8",
+  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.12/Game-Translator-0.12.apk",
+  "notes": "修复Windows打包路径分隔符导致安卓找不到多版本目录的问题，完善目录在线恢复，保留多版本匹配、公告和工具在线升级。覆盖安装即可，无需卸载或清除数据。"
+}
