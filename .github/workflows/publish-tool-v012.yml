@@ -1,3 +1,4 @@
+# APK asset paths verified from raw ZIP headers on Windows and Linux.
 name: Publish translation tool 0.12 and enable app updates
 on:
   push:
@@ -40,7 +41,7 @@ jobs:
         run: |
           set -euo pipefail
           if ! gh release view tool-v0.12 >/dev/null 2>&1; then
-            gh release create tool-v0.12 Game-Translator-0.12.apk --draft --title '游戏汉化工具 0.12 目录修复版' --notes '修复目录恢复流程，增加备用签名目录。保留多版本汉化、公告和工具在线升级。程序检查与APK签名核验通过；手机效果请安装后验证。可覆盖安装0.11，无需卸载。'
+            gh release create tool-v0.12 Game-Translator-0.12.apk --draft --title '游戏汉化工具 0.12 目录修复版' --notes '修复Windows打包路径分隔符导致目录读取失败的问题，完善在线恢复并增加备用签名目录。保留多版本汉化、公告和工具在线升级。程序检查与APK签名核验通过；手机效果请安装后验证。可覆盖安装0.11，无需卸载。'
           else
             gh release upload tool-v0.12 Game-Translator-0.12.apk --clobber
           fi
