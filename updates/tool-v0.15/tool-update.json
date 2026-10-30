@@ -1,0 +1,9 @@
+{
+  "package_name": "cn.fmg.patcher",
+  "version_code": 15,
+  "version_name": "0.15 本机导入修复版",
+  "size": 31020240,
+  "sha256": "fdeee73a99d5de1b9ac1c5dd22245973d3fcfe07aaf13753accf66887a6e7012",
+  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.15/Game-Translator-0.15.apk",
+  "notes": "修复启动自动检查占用导入按钮的问题；本机APK改为直接读取，主路径失败会尝试公共安装路径，显示复制进度，失败时弹出选择完整官方APK入口。拆分安装包仍需完整官方APK。保留问题报告和详细版本提示。模拟检查通过，出问题的具体手机兼容效果待验证。覆盖安装即可，无需卸载。"
+}
