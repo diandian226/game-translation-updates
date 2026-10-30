@@ -1,0 +1,78 @@
+name: Repair FMGWorld v7 signed download feeds
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/repair-fmg-v7-feed.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-fmgworld-channel
+  cancel-in-progress: false
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Verify actual release files against locally signed revision 7
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in update.json update-old.json catalog.json; do
+            gh api "repos/$GITHUB_REPOSITORY/contents/updates/fmgworld-v7-feed/$file?ref=$GITHUB_SHA" --jq .content | base64 --decode > "$file"
+          done
+          mkdir payloads
+          gh release download fmgworld-patch-v7 --pattern 'payload*.zip' --dir payloads
+          python3 - <<'PY'
+          import json,base64,hashlib
+          from pathlib import Path
+          for manifest,payload in [('update.json','payload.zip'),('update-old.json','payload-old.zip')]:
+              row=json.loads(base64.b64decode(json.loads(Path(manifest).read_text())['signed_data']))
+              blob=Path('payloads',payload).read_bytes()
+              assert row['version']==7 and row['game']=='fmgworld'
+              assert row['patch_url'].endswith('/fmgworld-patch-v7/'+payload)
+              assert len(blob)==row['patch_size'] and hashlib.sha256(blob).hexdigest()==row['patch_sha256']
+          catalog=json.loads(base64.b64decode(json.loads(Path('catalog.json').read_text())['signed_data']))
+          assert catalog['catalog_version']==4 and len(catalog['versions'])==2
+          assert all(json.loads(base64.b64decode(r['release']['signed_data']))['version']==7 for r in catalog['versions'])
+          PY
+      - name: Repair release manifests and retain previous ones
+        shell: bash
+        run: |
+          set -euo pipefail
+          publish_manifest() {
+            channel="$1"
+            filename="$2"
+            dir="check-$channel-$filename"
+            mkdir "$dir"
+            if gh release download "$channel" --pattern "$filename" --dir "$dir"; then
+              if cmp -s "$filename" "$dir/$filename"; then return; fi
+              id=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$channel" --jq ".assets[] | select(.name==\"$filename\") | .id")
+              test -n "$id"
+              gh api --method PATCH "repos/$GITHUB_REPOSITORY/releases/assets/$id" -f name="before-r7-$id-$filename" >/dev/null
+            fi
+            gh release upload "$channel" "$filename"
+          }
+          publish_manifest fmgworld-patch-v7 update.json
+          publish_manifest fmgworld-patch-v7 update-old.json
+          publish_manifest fmgworld-test-v3 update.json
+      - name: Activate exact-match signed version catalogue
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json" > catalogue-response.json
+          python3 - <<'PY'
+          import json,base64
+          from pathlib import Path
+          response=json.loads(Path('catalogue-response.json').read_text())
+          previous=json.loads(base64.b64decode(response['content']))
+          current=json.loads(base64.b64decode(previous['signed_data']))
+          assert current['catalog_version']<=4,'Newer catalogue already published'
+          request={'message':'Fix FMGWorld catalogue pointing to different payload files in v6; activate verified v7 downloads','sha':response['sha'],'branch':'main','content':base64.b64encode(Path('catalog.json').read_bytes()).decode()}
+          Path('request.json').write_text(json.dumps(request))
+          PY
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json" --input request.json >/dev/null
+          gh api "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json" --jq .content | base64 --decode > verified-catalogue.json
+          cmp catalog.json verified-catalogue.json
