@@ -50,7 +50,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          sha=$(gh api "repos/$GITHUB_REPOSITORY/contents/tool-update.json?ref=main" --jq .sha 2>/dev/null || true)
+          if ! sha=$(gh api "repos/$GITHUB_REPOSITORY/contents/tool-update.json?ref=main" --jq .sha 2>/dev/null); then sha=""; fi
           if [ -n "$sha" ]; then
             gh api "repos/$GITHUB_REPOSITORY/contents/tool-update.json?ref=main" --jq .content | base64 --decode > previous-tool-update.json
             python3 - <<'PY'
