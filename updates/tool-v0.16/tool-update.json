@@ -1,0 +1,9 @@
+{
+  "package_name": "cn.fmg.patcher",
+  "version_code": 16,
+  "version_name": "0.16 公告与反馈版",
+  "size": 31016144,
+  "sha256": "7e7573d4a2cc197632b3a994be880ab500d0ec708252c43baa148ba1ef5e54a5",
+  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.16/Game-Translator-0.16.apk",
+  "notes": "公告移动到首页最上方，新增去GitHub提交问题按钮，打开汉化工具仓库的新建Issue页面。保留版本匹配、问题报告、更新和本机导入功能。可覆盖安装旧工具，无需卸载。"
+}
