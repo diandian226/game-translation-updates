@@ -1,9 +1,9 @@
 {
   "package_name": "cn.fmg.patcher",
-  "version_code": 15,
-  "version_name": "0.15 本机导入修复版",
-  "size": 31020240,
-  "sha256": "fdeee73a99d5de1b9ac1c5dd22245973d3fcfe07aaf13753accf66887a6e7012",
-  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.15/Game-Translator-0.15.apk",
-  "notes": "修复启动自动检查占用导入按钮的问题；本机APK改为直接读取，主路径失败会尝试公共安装路径，显示复制进度，失败时弹出选择完整官方APK入口。拆分安装包仍需完整官方APK。保留问题报告和详细版本提示。模拟检查通过，出问题的具体手机兼容效果待验证。覆盖安装即可，无需卸载。"
+  "version_code": 16,
+  "version_name": "0.16 公告与反馈版",
+  "size": 31016144,
+  "sha256": "7e7573d4a2cc197632b3a994be880ab500d0ec708252c43baa148ba1ef5e54a5",
+  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.16/Game-Translator-0.16.apk",
+  "notes": "公告移动到首页最上方，新增去GitHub提交问题按钮，打开汉化工具仓库的新建Issue页面。保留版本匹配、问题报告、更新和本机导入功能。可覆盖安装旧工具，无需卸载。"
 }
