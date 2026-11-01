@@ -1,0 +1,9 @@
+{
+  "package_name": "cn.fmg.patcher",
+  "version_code": 21,
+  "version_name": "0.21 界面引导版",
+  "size": 31024336,
+  "sha256": "8080b9d379d4745519dd612e0d56d1b9ef86e826eb33f2a797b97779bee5efce",
+  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.21/Game-Translator-0.21.apk",
+  "notes": "新增界面框选教程：首次打开自动引导，也可从首页重看。蓝框标出按钮，区分已安装官方游戏与只有官方APK两种导入方式，说明自动匹配补丁、生成并安装中文版。支持上一步、下一步与跳过；保留启动更新检查及既有功能。下载后覆盖安装工具，无需卸载；此更新不修改游戏剧情。"
+}
