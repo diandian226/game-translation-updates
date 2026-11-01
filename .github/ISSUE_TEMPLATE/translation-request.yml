@@ -1,0 +1,42 @@
+name: 提交我想要汉化的软件
+description: 推荐想要汉化的软件或游戏，也可以直接提供资源地址。
+title: "[汉化申请] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请填写你想汉化的软件或游戏。提交后作者会在此处查看并回复；提交申请不代表已安排汉化。
+  - type: textarea
+    id: target
+    attributes:
+      label: 想要汉化的软件或游戏
+      description: 填写名称，或者直接粘贴资源地址；至少提供其中一项。
+      placeholder: 软件或游戏名称 / 官方页面 / 下载地址
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 版本号
+      placeholder: 例如 1.3p；不知道可留空
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 使用平台
+      options:
+        - 不确定
+        - Android（安卓 / 兼容安卓应用的鸿蒙）
+        - Windows（电脑）
+        - macOS
+        - Linux
+        - 其他
+  - type: textarea
+    id: resources
+    attributes:
+      label: 补充资源地址
+      description: 可选，填写官方页面、版本来源或其他有助于定位资源的链接。
+  - type: textarea
+    id: details
+    attributes:
+      label: 其他说明
+      placeholder: 例如目前哪些内容没有中文、是否已有汉化稿等。
