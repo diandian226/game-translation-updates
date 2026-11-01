@@ -1,0 +1,9 @@
+{
+  "package_name": "cn.fmg.patcher",
+  "version_code": 22,
+  "version_name": "0.22 新图标版",
+  "size": 31110758,
+  "sha256": "f67c6a69dfde0fc7a70119959b95ea5b47cb473a1467ba5be107bdb3321637c8",
+  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.22/Game-Translator-0.22.apk",
+  "notes": "更换为用户指定的蓝绿色汉化图标，提供五种安卓显示尺寸。保留首次打开界面框选教程、两种导入方式说明、版本匹配和启动更新检查。下载后覆盖安装工具，无需卸载，此更新不修改游戏剧情。"
+}
