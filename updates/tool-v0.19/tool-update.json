@@ -1,0 +1,9 @@
+{
+  "package_name": "cn.fmg.patcher",
+  "version_code": 19,
+  "version_name": "0.19 启动检查版",
+  "size": 31020240,
+  "sha256": "07dc2b141451b735add1cbc188cc060b08f9352c80fb1c8dd51866e62e284818",
+  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.19/Game-Translator-0.19.apk",
+  "notes": "取消工具更新检查的24小时限制，每次启动自动联网检查工具版本，发现新版弹出升级提示。自动检查失败会提示并记录错误，下次启动重试。保留手动检查、游戏补丁匹配和其他功能。下载及覆盖安装仍需用户确认。"
+}
