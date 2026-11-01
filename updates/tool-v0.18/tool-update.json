@@ -1,0 +1,9 @@
+{
+  "package_name": "cn.fmg.patcher",
+  "version_code": 18,
+  "version_name": "0.18 汉化申请版",
+  "size": 31020240,
+  "sha256": "952866ad80b76d4c7ce7eef2341344f4f952c39a4af1972b97e1df2542b68461",
+  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.18/Game-Translator-0.18.apk",
+  "notes": "公告下新增提交我想要汉化的软件按钮，打开GitHub汉化申请表，可填写软件或游戏名称、版本、平台及资源地址。登录GitHub后提交，作者可在Issues中查看回复。包含前版安装入口改进。可覆盖安装，无需卸载。"
+}
