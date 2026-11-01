@@ -19,7 +19,7 @@ body:
     id: attachments
     attributes:
       label: 上传附件（可选）
-      description: 点击输入框的附件按钮选择文件，或拖入文件；没有附件直接提交。安装包请先压缩成ZIP，单个附件不超过25MB，更大的文件请在上面填写网盘链接。
+      description: 附上资源可以让汉化更快，适配更准。点击输入框的附件按钮选择文件，或拖入文件；没有附件直接提交。安装包请先压缩成ZIP，单个附件不超过25MB，更大的文件请在上面填写网盘链接。
       placeholder: 有安装包或压缩包就上传，没有可留空
     validations:
       required: false
