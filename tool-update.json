@@ -1,9 +1,9 @@
 {
   "package_name": "cn.fmg.patcher",
-  "version_code": 23,
-  "version_name": "0.23 平行宇宙适配版",
-  "size": 38672229,
-  "sha256": "cc647a39f759b134847d8186ba6a3f02b93c5154933a58e2ce4f4562100f2259",
-  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.23/Game-Translator-0.23.apk",
-  "notes": "新增平行宇宙V1.3.1p安卓原包适配、独立游戏选项、内置中文补丁、原包指纹和版本匹配及联网补丁更新。补齐退出等确认提示的中文。与官方版共存，保留FMGWorld及女神制造者功能。下载后覆盖安装旧工具，无需卸载。"
+  "version_code": 24,
+  "version_name": "0.24 万物生长领域测试版",
+  "size": 46708824,
+  "sha256": "1fd0c9193328d265f279227f06a6b579a9e3bb66ec8624d114388b1c28c6222c",
+  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.24/Game-Translator-0.24.apk",
+  "notes": "新增万物生长领域0.3.4.2安卓原包适配及独立游戏选项、中文测试补丁和Godot资源合并。补齐物品栏顶部角色、队伍、任务日志页签。保留FMG世界、女神制造者、平行宇宙功能。覆盖安装旧工具后，选择万物生长领域并导入官方原包测试。此版为测试适配，安卓实机全流程尚待验证。"
 }
