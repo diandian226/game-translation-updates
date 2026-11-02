@@ -1,9 +1,9 @@
 {
   "package_name": "cn.fmg.patcher",
-  "version_code": 24,
-  "version_name": "0.24 万物生长领域测试版",
+  "version_code": 25,
+  "version_name": "0.25 万物生长领域识别修复版",
   "size": 46708824,
-  "sha256": "1fd0c9193328d265f279227f06a6b579a9e3bb66ec8624d114388b1c28c6222c",
-  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.24/Game-Translator-0.24.apk",
-  "notes": "新增万物生长领域0.3.4.2安卓原包适配及独立游戏选项、中文测试补丁和Godot资源合并。补齐物品栏顶部角色、队伍、任务日志页签。保留FMG世界、女神制造者、平行宇宙功能。覆盖安装旧工具后，选择万物生长领域并导入官方原包测试。此版为测试适配，安卓实机全流程尚待验证。"
+  "sha256": "e41801e9831a9e901eea61ba23dbfed3ecf6076704490b4fce03308b860927e1",
+  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.25/Game-Translator-0.25.apk",
+  "notes": "修复 Android 11 及以上系统无法识别已安装的万物生长领域官方版。增加官方包与汉化版的包可见性声明；保留 0.24 的游戏适配、补丁更新及原有功能。可覆盖安装旧工具，无需卸载。"
 }
