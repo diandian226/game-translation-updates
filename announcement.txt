@@ -4,19 +4,6 @@
 使用：升级工具 → 选择平行宇宙 → 导入官方APK → 使用对应补丁 → 生成并安装中文版。
 补丁发布页：https://github.com/diandian226/game-translation-updates/releases/tag/inaparalleluniverse-patch-v1
 仅发布汉化补丁和工具更新，不提供完整游戏APK。工具生成的中文版与官方版共存，官方私有存档不会自动迁移。
-
 【工具升级通知】请更新到 V0.23，升级后游戏列表会出现“平行宇宙”。点击“检查工具新版本”，下载并覆盖安装即可，原工具数据保留，无需卸载。
-
 工具下载：https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.23/Game-Translator-0.23.apk
 如果旧工具没有“检查工具新版本”功能，请手动下载上面的APK覆盖安装；游戏补丁更新不等于工具升级。
-
-———————— 原公告 ————————
-已更新
-FMGWorld：第4版汉化补丁已发布，适配0.2.1原版 build1793127647，合并新版修复并补译收银员任务。
-女神制造者：已适配指定1.1.67 PartOne原版APK。
-
-更新中
-平行宇宙：部分动态候选及图片文字仍待完善。
-
-使用提醒
-下载汉化补丁后，需要重新生成并安装中文版；工具本身升级需另行安装新版工具APK。
