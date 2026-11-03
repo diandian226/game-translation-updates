@@ -1,0 +1,28 @@
+{
+  "changed_files": [
+    "assets/x-game/x-gui.rpyc",
+    "assets/x-game/x-zzzzzz_fmg_build1793478118_zh.rpyc"
+  ],
+  "font_file_coverage": {
+    "font": "gui/fonts/ChineseUI.ttc",
+    "checked_cjk_characters": 3341,
+    "missing_cjk_characters": [],
+    "sample_glyphs": {
+      "汉": 2126,
+      "化": 1303,
+      "世": 1037,
+      "界": 2313,
+      "测": 2169,
+      "试": 2721,
+      "角": 2693,
+      "色": 2601,
+      "任": 1120,
+      "务": 1287
+    }
+  },
+  "actual_payload_defaults": "PASS",
+  "font_variant_glyph_generation": 20,
+  "original_script_ids_preserved": true,
+  "phone_visual_test": "NOT_RUN",
+  "render_snapshot": "NOT_RUN_TEST_ENTRY_UNSUPPORTED"
+}
