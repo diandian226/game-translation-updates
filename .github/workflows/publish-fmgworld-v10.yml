@@ -1,0 +1,61 @@
+name: Publish FMGWorld UI English fallback fix v10
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/publish-fmgworld-v10.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-fmgworld-channel
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Retrieve full patch and signed metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in assemble.py update.json catalog.json qa.json update-cert.der.b64 payload.part00.b64 payload.part01.b64 payload.part02.b64 payload.part03.b64 payload.part04.b64 payload.part05.b64 payload.part06.b64 payload.part07.b64 payload.part08.b64 payload.part09.b64 payload.part10.b64 payload.part11.b64 payload.part12.b64 payload.part13.b64 payload.part14.b64 payload.part15.b64 payload.part16.b64 payload.part17.b64 payload.part18.b64 payload.part19.b64 payload.part20.b64 payload.part21.b64 payload.part22.b64 payload.part23.b64 payload.part24.b64 payload.part25.b64 ; do
+            gh api "repos/$GITHUB_REPOSITORY/contents/updates/fmgworld-v10/$file?ref=$GITHUB_SHA" --jq .content | base64 --decode > "$file"
+          done
+          python3 assemble.py
+          base64 --decode update-cert.der.b64 > update-cert.der
+          openssl x509 -inform DER -in update-cert.der -pubkey -noout > public.pem
+          openssl dgst -sha256 -verify public.pem -signature update.sig update.signed
+          openssl dgst -sha256 -verify public.pem -signature catalog.sig catalog.signed
+      - name: Upload and verify exact release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! gh release view fmgworld-patch-v10 >/dev/null 2>&1; then
+            gh release create fmgworld-patch-v10 payload.zip update.json --draft --prerelease --target "$GITHUB_SHA" --title 'FMGWorld 构建1793478118 · 界面英文回退修复10' --notes '修复v8/v9更新后界面、菜单、角色与预设名称等大量文本仍显示英文的问题。原因：补丁替换了脚本文字但保留了旧的代码哈希，游戏自带的官方字节码缓存按旧哈希命中，直接执行了英文原版代码（2420处中文表达式中有2206处受影响）。v10重算全部哈希，命中英文缓存降为0。另含：预设名改为普通人/美颜大师/硬汉，片头加入翻译致谢。字体修复9的内容保持不变。实体安卓显示仍待反馈。工具下载修复10后需重新生成并安装中文版。只发布汉化补丁，不包含游戏安装包。'
+          fi
+          mkdir downloaded
+          gh release download fmgworld-patch-v10 --pattern payload.zip --pattern update.json --dir downloaded
+          cmp payload.zip downloaded/payload.zip
+          cmp update.json downloaded/update.json
+          gh release edit fmgworld-patch-v10 --draft=false --prerelease
+      - name: Activate catalogue only after release download verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json?ref=main" > current.json
+          python3 - <<'PY'
+          import json,base64
+          from pathlib import Path
+          response=json.loads(Path('current.json').read_text())
+          old=json.loads(base64.b64decode(json.loads(base64.b64decode(response['content']))['signed_data']))
+          new=json.loads(base64.b64decode(json.loads(Path('catalog.json').read_text())['signed_data']))
+          assert old['catalog_version']<new['catalog_version'],'Refuse to replace newer catalogue'
+          assert {r['version_code'] for r in old['versions']} <= {r['version_code'] for r in new['versions']},'Would lose existing game build'
+          request={'message':'Enable FMGWorld UI English fallback fix v10; retain previous game builds','sha':response['sha'],'branch':'main','content':base64.b64encode(Path('catalog.json').read_bytes()).decode()}
+          Path('request.json').write_text(json.dumps(request))
+          PY
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json" --input request.json >/dev/null
+          gh api "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json?ref=main" --jq .content | base64 --decode > verified-catalog.json
+          cmp catalog.json verified-catalog.json

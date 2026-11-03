@@ -1,0 +1,8 @@
+{
+  "fix": "v9 patched .rpyc strings but kept the original PyExpr/PyCode hashcodes; Ren'Py keys its bytecode cache on hashcode, so the APK's bundled official cache/bytecode-312.rpyb returned the original English code for translated UI/menu/name expressions",
+  "chinese_expressions": 2420,
+  "v9_hits_on_official_english_cache": 2206,
+  "v10_hits_on_official_english_cache": 0,
+  "v10_stale_hashcodes": 0,
+  "phone_visual_test": "NOT_RUN"
+}
