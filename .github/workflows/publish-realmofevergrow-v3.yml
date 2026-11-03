@@ -1,0 +1,63 @@
+name: Publish Realm of Evergrow tutorial list Chinese hotfix v3
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/publish-realmofevergrow-v3.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-realmofevergrow-channel
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Retrieve patch transfer and signed metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in assemble.py update.json catalog.json qa.json update-cert.der.b64 transfer.part0.b64; do
+            gh api "repos/$GITHUB_REPOSITORY/contents/updates/realmofevergrow-v3/$file?ref=$GITHUB_SHA" --jq .content | base64 --decode > "$file"
+          done
+          mkdir base
+          gh release download realmofevergrow-patch-v2 --pattern payload.zip --dir base
+          python3 assemble.py
+          base64 --decode update-cert.der.b64 > update-cert.der
+          openssl x509 -inform DER -in update-cert.der -pubkey -noout > public.pem
+          openssl dgst -sha256 -verify public.pem -signature update.sig update.signed
+          openssl dgst -sha256 -verify public.pem -signature catalog.sig catalog.signed
+      - name: Upload and verify exact release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! gh release view realmofevergrow-patch-v3 >/dev/null 2>&1; then
+            gh release create realmofevergrow-patch-v3 payload.zip update.json --draft --prerelease --target "$GITHUB_SHA" --title '万物生长领域 0.3.4.2 中文测试3 · 教程列表补译' --notes '补齐教程列表中的战斗、制作、符文、测试教程、世界等标题。使用显示翻译保留原始教程资源名与自动跳转匹配。仅更新中文界面脚本，其他219个补丁文件不变。电脑版本地补丁同步修复。已核对补丁完整性、签名、资源名与更新目录；手机显示和教程点击仍待测试。工具选择万物生长领域，导入对应官方0.3.4.2 APK，下载中文测试3后重新生成并安装。此处只发布汉化补丁。'
+          fi
+          mkdir downloaded
+          gh release download realmofevergrow-patch-v3 --pattern payload.zip --pattern update.json --dir downloaded
+          cmp payload.zip downloaded/payload.zip
+          cmp update.json downloaded/update.json
+          gh release edit realmofevergrow-patch-v3 --draft=false --prerelease
+      - name: Activate catalogue only after release download verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/contents/catalogs/realmofevergrow.json?ref=main" > current.json
+          python3 - <<'PY'
+          import json,base64
+          from pathlib import Path
+          response=json.loads(Path('current.json').read_text())
+          old=json.loads(base64.b64decode(json.loads(base64.b64decode(response['content']))['signed_data']))
+          new=json.loads(base64.b64decode(json.loads(Path('catalog.json').read_text())['signed_data']))
+          assert old['catalog_version']<=new['catalog_version'],'Refuse to replace newer catalogue'
+          assert {r['version_code'] for r in old['versions']} <= {r['version_code'] for r in new['versions']},'Would lose existing game build'
+          request={'message':'Enable verified Realm of Evergrow tutorial list hotfix v3','sha':response['sha'],'branch':'main','content':base64.b64encode(Path('catalog.json').read_bytes()).decode()}
+          Path('request.json').write_text(json.dumps(request))
+          PY
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/catalogs/realmofevergrow.json" --input request.json >/dev/null
+          gh api "repos/$GITHUB_REPOSITORY/contents/catalogs/realmofevergrow.json?ref=main" --jq .content | base64 --decode > verified-catalog.json
+          cmp catalog.json verified-catalog.json
