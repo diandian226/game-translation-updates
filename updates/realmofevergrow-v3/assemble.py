@@ -21,7 +21,7 @@ assert len(blob)==meta['patch_size'] and hashlib.sha256(blob).hexdigest()==meta[
 with zipfile.ZipFile(io.BytesIO(blob)) as z:
     assert z.testzip() is None
     assert len(z.infolist())==220
-    assert all(n.startswith('assets/x-game/') and n.endswith(('.rpyc','.ttc','.ttf','.otf')) and '..' not in n for n in z.namelist())
+    assert all(n.startswith('assets/') and n.endswith(('.gdc','.tscn','.tres','.res','.translation','.cfg','.gd','.json','.ttf','.ttc','.otf')) and '..' not in n for n in z.namelist())
 catalog=json.loads(base64.b64decode(json.loads(Path('catalog.json').read_text())['signed_data']))
 assert catalog['catalog_version']==3 and len(catalog['versions'])==1
 assert any(r['version_code']==1 and json.loads(base64.b64decode(r['release']['signed_data']))==meta for r in catalog['versions'])
