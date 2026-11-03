@@ -1,0 +1,59 @@
+{
+  "patch": 17,
+  "base": 16,
+  "changed_existing_files": [
+    "assets/x-game/x-UI/x-inventoryScreen.rpyc"
+  ],
+  "new_script": "zzzzzzzzzzzz_fmg_items_fix17.rpyc",
+  "original_node_ids": "PRESERVED",
+  "drop_button_action": "BOUND_TO_BATCH_HANDLER",
+  "expression_hashes": 23167,
+  "files": 234,
+  "phone_visual_test": "NOT_RUN",
+  "item_regression": {
+    "patch": 17,
+    "checks": [
+      "full_equipment_keeps_gift",
+      "duplicate_weapon_keeps_gift",
+      "successful_equipment_applies_effect_once",
+      "bulk_gift_stops_at_capacity_without_loss",
+      "silent_equipment_refusal_keeps_gift",
+      "milk_removes_all_0_effects",
+      "milk_removes_all_1_effects",
+      "milk_removes_all_2_effects",
+      "milk_removes_all_3_effects",
+      "milk_removes_all_10_effects",
+      "milk_preserves_sleep_and_supports_self_removing_callbacks",
+      "gift_consumable_uses_receiver_inventory",
+      "batch_drop_3_from_3",
+      "batch_drop_8_from_2",
+      "batch_drop_0_from_2",
+      "batch_drop_-1_from_2",
+      "stale_drop_selection_safe",
+      "normal_unequip_unchanged"
+    ],
+    "passed": 18,
+    "phone_visual_test": "NOT_RUN"
+  },
+  "previous_inventory_regression": {
+    "build": 1793629832,
+    "checks": [
+      "use_count3_stock1",
+      "invalid_count_None",
+      "invalid_count_-1",
+      "invalid_count_0",
+      "invalid_count_invalid",
+      "null_selection",
+      "mid_loop_depletion",
+      "give_count_stock_limit",
+      "take_without_consuming",
+      "sell_no_duplicate_money",
+      "buy_stock_limit",
+      "preserves_build_purchase_semantics"
+    ],
+    "passed": 12,
+    "engine": "RenPy 8.5.3",
+    "phone_visual_test": "NOT_RUN"
+  },
+  "confirmation_types_tested": 11
+}
