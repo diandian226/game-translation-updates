@@ -1,0 +1,85 @@
+name: Publish FMGWorld three-build inventory and sprite repair v14
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/publish-fmgworld-v14.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-fmgworld-channel
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Retrieve staged signed release
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in assemble.py parts.json update.json update-old.json update-middle.json catalog.json qa.json release-notes.md update-cert.der.b64 transfer.part00.b64 transfer.part01.b64 transfer.part02.b64 transfer.part03.b64 transfer.part04.b64 transfer.part05.b64 transfer.part06.b64 transfer.part07.b64 transfer.part08.b64 transfer.part09.b64 transfer.part10.b64 transfer.part11.b64 transfer.part12.b64 transfer.part13.b64 transfer.part14.b64 transfer.part15.b64 transfer.part16.b64 transfer.part17.b64 transfer.part18.b64 transfer.part19.b64 transfer.part20.b64 transfer.part21.b64 transfer.part22.b64 transfer.part23.b64 transfer.part24.b64; do
+            gh api "repos/$GITHUB_REPOSITORY/contents/updates/fmgworld-v14/$file?ref=$GITHUB_SHA" --jq .content | base64 --decode > "$file"
+          done
+          mkdir -p bases/old bases/middle bases/new
+          gh release download fmgworld-patch-v7 --pattern payload-old.zip --dir bases/old
+          gh release download fmgworld-patch-v7 --pattern payload.zip --dir bases/middle
+          gh release download fmgworld-patch-v11 --pattern payload.zip --dir bases/new
+          python3 assemble.py
+          base64 --decode update-cert.der.b64 > update-cert.der
+          openssl x509 -inform DER -in update-cert.der -pubkey -noout > public.pem
+          for name in update update-old update-middle catalog; do
+            openssl dgst -sha256 -verify public.pem -signature "$name.sig" "$name.signed"
+          done
+      - name: Upload and independently download exact assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          assets=(payload.zip payload-old.zip payload-middle.zip update.json update-old.json update-middle.json qa.json)
+          if ! gh release view fmgworld-patch-v14 >/dev/null 2>&1; then
+            gh release create fmgworld-patch-v14 "${assets[@]}" --draft --prerelease --target "$GITHUB_SHA" --title 'FMGWorld 修复14 · 三版本物品崩溃与立绘修复' --notes-file release-notes.md
+          fi
+          mkdir downloaded
+          for file in "${assets[@]}"; do
+            gh release download fmgworld-patch-v14 --pattern "$file" --dir downloaded
+            cmp "$file" "downloaded/$file"
+          done
+          gh release edit fmgworld-patch-v14 --draft=false --prerelease
+      - name: Activate catalogue after release asset verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json?ref=main" > current.json
+          python3 - <<'PY'
+          import json,base64
+          from pathlib import Path
+          response=json.loads(Path('current.json').read_text())
+          old=json.loads(base64.b64decode(json.loads(base64.b64decode(response['content']))['signed_data']))
+          new=json.loads(base64.b64decode(json.loads(Path('catalog.json').read_text())['signed_data']))
+          assert old['catalog_version']<new['catalog_version'],'Refuse to replace an equal or newer catalogue'
+          old_versions={r['version_code']:json.loads(base64.b64decode(r['release']['signed_data'])) for r in old['versions']}
+          new_versions={r['version_code']:json.loads(base64.b64decode(r['release']['signed_data'])) for r in new['versions']}
+          assert set(old_versions)<=set(new_versions)
+          for code,data in old_versions.items():
+              assert data['source_sha256']==new_versions[code]['source_sha256']
+              assert data['version']<new_versions[code]['version']
+          Path('request.json').write_text(json.dumps({'message':'Enable inventory and sprite repair14 for all three FMGWorld original builds','branch':'main','sha':response['sha'],'content':base64.b64encode(Path('catalog.json').read_bytes()).decode()}))
+          PY
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json" --input request.json >/dev/null
+          gh api "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json?ref=main" --jq .content | base64 --decode > verified-catalog.json
+          cmp catalog.json verified-catalog.json
+      - name: Advance existing legacy middle-build update channel
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir legacy
+          gh release download fmgworld-test-v3 --pattern update.json --dir legacy
+          cp legacy/update.json "legacy/before-v14-$GITHUB_RUN_ID-update.json"
+          gh release upload fmgworld-test-v3 "legacy/before-v14-$GITHUB_RUN_ID-update.json"
+          cp update-middle.json legacy/update.json
+          gh release upload fmgworld-test-v3 legacy/update.json --clobber
+          mkdir legacy-verify
+          gh release download fmgworld-test-v3 --pattern update.json --dir legacy-verify
+          cmp update-middle.json legacy-verify/update.json
