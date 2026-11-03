@@ -1,0 +1,63 @@
+name: Publish FMGWorld Chinese font hotfix v9
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/publish-fmgworld-v9.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-fmgworld-channel
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Retrieve patch transfer and signed metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in assemble.py update.json catalog.json qa.json update-cert.der.b64 transfer.part0.b64; do
+            gh api "repos/$GITHUB_REPOSITORY/contents/updates/fmgworld-v9/$file?ref=$GITHUB_SHA" --jq .content | base64 --decode > "$file"
+          done
+          mkdir base
+          gh release download fmgworld-patch-v8 --pattern payload.zip --dir base
+          python3 assemble.py
+          base64 --decode update-cert.der.b64 > update-cert.der
+          openssl x509 -inform DER -in update-cert.der -pubkey -noout > public.pem
+          openssl dgst -sha256 -verify public.pem -signature update.sig update.signed
+          openssl dgst -sha256 -verify public.pem -signature catalog.sig catalog.signed
+      - name: Upload and verify exact release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! gh release view fmgworld-patch-v9 >/dev/null 2>&1; then
+            gh release create fmgworld-patch-v9 payload.zip update.json --draft --prerelease --target "$GITHUB_SHA" --title 'FMGWorld 构建1793478118 · 中文字体修复9' --notes '修复v8更新后中文显示为问号的问题：修正实际打包的默认字体表达式，统一中文字体，并覆盖新版字体选择的普通、粗体和斜体组合。仅修改字体配置与字体兼容脚本，剧情及其他227个补丁条目保持不变。已核验译文全部3341个汉字的字体覆盖，并对实际补丁验证20种字体组合的字形生成。实体安卓显示仍待反馈。工具下载修复9后需重新生成并安装中文版。只发布汉化补丁，不包含游戏安装包。'
+          fi
+          mkdir downloaded
+          gh release download fmgworld-patch-v9 --pattern payload.zip --pattern update.json --dir downloaded
+          cmp payload.zip downloaded/payload.zip
+          cmp update.json downloaded/update.json
+          gh release edit fmgworld-patch-v9 --draft=false --prerelease
+      - name: Activate catalogue only after release download verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json?ref=main" > current.json
+          python3 - <<'PY'
+          import json,base64
+          from pathlib import Path
+          response=json.loads(Path('current.json').read_text())
+          old=json.loads(base64.b64decode(json.loads(base64.b64decode(response['content']))['signed_data']))
+          new=json.loads(base64.b64decode(json.loads(Path('catalog.json').read_text())['signed_data']))
+          assert old['catalog_version']<=new['catalog_version'],'Refuse to replace newer catalogue'
+          assert {r['version_code'] for r in old['versions']} <= {r['version_code'] for r in new['versions']},'Would lose existing game build'
+          request={'message':'Enable verified FMGWorld font fix v9; retain previous game builds','sha':response['sha'],'branch':'main','content':base64.b64encode(Path('catalog.json').read_bytes()).decode()}
+          Path('request.json').write_text(json.dumps(request))
+          PY
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json" --input request.json >/dev/null
+          gh api "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json?ref=main" --jq .content | base64 --decode > verified-catalog.json
+          cmp catalog.json verified-catalog.json
