@@ -1,0 +1,7 @@
+{
+  "fix": "Menu button 'Stats' and gallery folder names were still English: the rebuilt translation for build 1793478118 lost the gallery title wrapper and the Stats label. v11 adds them to the runtime exact-match display table (config.replace_text).",
+  "base": "fmgworld-patch-v10 payload; only x-zzzzzz_fmg_build1793478118_zh.rpyc replaced (compiled with Ren'Py 8.5.3.26051504, same as the game)",
+  "runtime_test_full_game_scripts": {"Stats": "数据统计", "gallery_folder_names": 333, "gallery_untranslated": 0, "gallery_title_sample": "图片 → 场景 → 健身房"},
+  "v10_baseline_same_test": {"Stats": "Stats", "gallery_untranslated": 136},
+  "phone_visual_test": "NOT_RUN"
+}
