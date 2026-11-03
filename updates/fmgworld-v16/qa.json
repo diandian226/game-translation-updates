@@ -1,0 +1,10 @@
+{
+  "base_patch": 15,
+  "patch": 16,
+  "confirmed_dialogues": 11,
+  "renpy_text_token_checks": "PASS",
+  "all_patch15_files_preserved": true,
+  "files": 233,
+  "phone_visual_test": "NOT_RUN",
+  "other_inventory_findings_fixed": false
+}
