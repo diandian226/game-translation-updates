@@ -1,0 +1,63 @@
+name: Publish FMGWorld build 1793478118 Chinese test patch v8
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/publish-fmgworld-v8.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-fmgworld-channel
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Retrieve patch transfer and signed metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in assemble.py update.json catalog.json qa.json update-cert.der.b64 transfer.part{0..8}.b64; do
+            gh api "repos/$GITHUB_REPOSITORY/contents/updates/fmgworld-v8/$file?ref=$GITHUB_SHA" --jq .content | base64 --decode > "$file"
+          done
+          mkdir base
+          gh release download fmgworld-patch-v7 --pattern payload.zip --dir base
+          python3 assemble.py
+          base64 --decode update-cert.der.b64 > update-cert.der
+          openssl x509 -inform DER -in update-cert.der -pubkey -noout > public.pem
+          openssl dgst -sha256 -verify public.pem -signature update.sig update.signed
+          openssl dgst -sha256 -verify public.pem -signature catalog.sig catalog.signed
+      - name: Upload and verify exact release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! gh release view fmgworld-patch-v8 >/dev/null 2>&1; then
+            gh release create fmgworld-patch-v8 payload.zip update.json --draft --prerelease --target "$GITHUB_SHA" --title 'FMGWorld 0.2.1 新构建1793478118 · 中文测试补丁v8' --notes '适配官方安卓版0.2.1构建1793478118。迁移已有中文，补译字体设置、旧存档警告、序章选项及新增改写提示；保留新版逻辑、原始脚本节点ID和中文字体后备。通过引擎脚本加载、初始化、补丁签名、合并APK签名及资源保留检查。原版自带12个缺图引用，汉化未新增；实体安卓运行和全剧情仍待测试。工具导入本次官方APK后检查对应版本补丁，下载v8、重新生成并安装中文版。本发布只含汉化补丁。'
+          fi
+          mkdir downloaded
+          gh release download fmgworld-patch-v8 --pattern payload.zip --pattern update.json --dir downloaded
+          cmp payload.zip downloaded/payload.zip
+          cmp update.json downloaded/update.json
+          gh release edit fmgworld-patch-v8 --draft=false --prerelease
+      - name: Activate catalogue only after release download verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json?ref=main" > current.json
+          python3 - <<'PY'
+          import json,base64
+          from pathlib import Path
+          response=json.loads(Path('current.json').read_text())
+          old=json.loads(base64.b64decode(json.loads(base64.b64decode(response['content']))['signed_data']))
+          new=json.loads(base64.b64decode(json.loads(Path('catalog.json').read_text())['signed_data']))
+          assert old['catalog_version']<=new['catalog_version'],'Refuse to replace newer catalogue'
+          assert {r['version_code'] for r in old['versions']} <= {r['version_code'] for r in new['versions']},'Would lose existing game build'
+          request={'message':'Enable verified FMGWorld 1793478118 Chinese test patch v8; retain previous game builds','sha':response['sha'],'branch':'main','content':base64.b64encode(Path('catalog.json').read_bytes()).decode()}
+          Path('request.json').write_text(json.dumps(request))
+          PY
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json" --input request.json >/dev/null
+          gh api "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json?ref=main" --jq .content | base64 --decode > verified-catalog.json
+          cmp catalog.json verified-catalog.json
