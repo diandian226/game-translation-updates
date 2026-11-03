@@ -1,0 +1,281 @@
+{
+  "historical_packages_checked": 17,
+  "games_checked": 4,
+  "supported_game_builds": 6,
+  "affected_game": "fmgworld",
+  "updated_builds": [
+    1793047536,
+    1793127647,
+    1793478118
+  ],
+  "regression_checks_passed": 36,
+  "sprite_checks": "all three builds passed actual RenPy methods and image decoding",
+  "other_games": [
+    {
+      "game": "inaparalleluniverse-patch-v1",
+      "scope": "Published patch executable Python statements",
+      "functions_inspected": [
+        "_cn_name",
+        "_cn_say_tr",
+        "_cn_replace_text",
+        "_cn_say_filter",
+        "_cn_replace"
+      ],
+      "fmg_inventory_calls": [],
+      "same_crash": "NOT_APPLICABLE",
+      "action": "No unrelated FMGWorld functions injected",
+      "whole_game_playthrough": "NOT_RUN"
+    },
+    {
+      "game": "outgrow-channel",
+      "scope": "Published patch executable Python statements",
+      "functions_inspected": [
+        "_ogzh_translate_ui",
+        "_ogzh_say",
+        "_ogzh_replace",
+        "norm",
+        "parts",
+        "__init__",
+        "localize_names",
+        "translate",
+        "_ogzh_name_prompt",
+        "_ogzh_name_rule",
+        "_ogzh_input_confirm",
+        "_ogzh_scene_title",
+        "_ogzh_event_caption",
+        "_ogzh_cheat_bump",
+        "_ogzh_cheat_flip",
+        "_ogzh_task_text",
+        "_ogzh_task_replace",
+        "_ogzh_stock_name",
+        "_ogzh_stock_count"
+      ],
+      "fmg_inventory_calls": [],
+      "same_crash": "NOT_APPLICABLE",
+      "action": "No unrelated FMGWorld functions injected",
+      "whole_game_playthrough": "NOT_RUN"
+    },
+    {
+      "game": "realmofevergrow-patch-v3",
+      "engine": "Godot",
+      "gdc_files_checked": 40,
+      "checks": [
+        {
+          "file": "assets/Scenes/Combat/characters_display.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scenes/Crafting/crafting_scene.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scenes/GUI/Colosseum/Colosseum.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scenes/GUI/Colosseum/OpponentCard.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scenes/GUI/CoreStone/CoreStoneRerollChoice.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scenes/GUI/CoreStone/CoreStoneScene.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scenes/GUI/Noticeboard/DealOffer.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scenes/GUI/Party/party_slot.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scenes/GUI/Shop/shop_scene.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scenes/GUI/gui.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scenes/GUI/player_menu.gdc",
+          "new_identifiers": [
+            "tr"
+          ],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scenes/Inventory/StorageUpgradeButton.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scenes/Inventory/inventory_slot.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scenes/Inventory/item_tooltip.gdc",
+          "new_identifiers": [
+            "tr"
+          ],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scenes/Menu/SaveSlot.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scenes/Menu/load_save_game.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scenes/Overworld/CharacterSlot.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scripts/Archive/ArchiveManager.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scripts/BlockData.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scripts/CharacterHelper.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scripts/Combat/Combat.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scripts/Combat/CombatHelper.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scripts/Dungeons/dungeonMap.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scripts/GlobalData.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scripts/GlobalHelper.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scripts/Inventory/CoreStoneHelper.gdc",
+          "new_identifiers": [
+            "TranslationServer",
+            "str",
+            "translate"
+          ],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scripts/Saving/ProgressData.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scripts/Saving/SaveGameData.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scripts/ScalingHelper.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scripts/WorldMap/enemy.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scripts/WorldMap/outside_compatibility.gdc",
+          "new_identifiers": [
+            "tr"
+          ],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/Scripts/WorldMap/worldGen.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/addons/dialogic/Modules/DefaultLayoutParts/Layer_Glossary/glossary_popup_layer.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/addons/maaacks_menus_template/base/scenes/credits/credits_label.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/addons/maaacks_menus_template/base/scenes/loading_screen/loading_screen.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/addons/maaacks_menus_template/base/scenes/menus/options_menu/input/input_actions_tree.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/addons/maaacks_menus_template/base/scenes/menus/options_menu/input/input_options_menu.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/addons/maaacks_menus_template/base/scenes/menus/options_menu/input/key_assignment_dialog.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/addons/maaacks_menus_template/base/scenes/menus/options_menu/option_control/option_control.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        },
+        {
+          "file": "assets/addons/maaacks_menus_template/base/scenes/menus/options_menu/video/video_options_menu.gdc",
+          "new_identifiers": [],
+          "numeric_constants": "UNCHANGED"
+        }
+      ],
+      "same_crash": "NOT_APPLICABLE",
+      "item_key_strategy": "numeric IDs; null checks in InventoryData preserved",
+      "whole_game_playthrough": "NOT_RUN"
+    }
+  ],
+  "phone_visual_test": "NOT_RUN",
+  "audit_scope": "reported inventory/null/asset-path defects; not a whole-game playthrough"
+}
