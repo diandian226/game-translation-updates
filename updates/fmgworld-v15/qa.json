@@ -1,0 +1,339 @@
+{
+  "game": "FMGWorld",
+  "official_version": "0.2.1",
+  "official_build": 1793629832,
+  "patch_version": 15,
+  "source_sha256": "c286e9f1579bc26e2843d405239d25b3a28c188f6fd121c08617e8213289a6a6",
+  "source_signature": "VERIFIED_ANDROID_8_PLUS",
+  "official_scripts": 221,
+  "source_files_with_actual_changes": 3,
+  "unmatched_translation_sources": 0,
+  "base_translation_patch": 14,
+  "preserved_script_node_ids": true,
+  "tests": {
+    "new_build_engine_test.json": {
+      "build": 1793629832,
+      "new_button_labels": "PASS",
+      "take_all_three_items": "PASS",
+      "give_all_three_items": "PASS",
+      "new_training_threshold": {
+        "40": false,
+        "59": false,
+        "60": true
+      },
+      "official_bytecode_cache_included": true,
+      "phone_visual_test": "NOT_RUN"
+    },
+    "inventory_1793629832.json": {
+      "build": 1793629832,
+      "checks": [
+        "use_count3_stock1",
+        "invalid_count_None",
+        "invalid_count_-1",
+        "invalid_count_0",
+        "invalid_count_invalid",
+        "null_selection",
+        "mid_loop_depletion",
+        "give_count_stock_limit",
+        "take_without_consuming",
+        "sell_no_duplicate_money",
+        "buy_stock_limit",
+        "preserves_build_purchase_semantics"
+      ],
+      "passed": 12,
+      "engine": "RenPy 8.5.3",
+      "phone_visual_test": "NOT_RUN"
+    },
+    "sprite_1793629832.json": {
+      "official_image": "images/people/NPCs/city/Futa Officer 1/6.png",
+      "image_dimensions": [
+        1024,
+        1024
+      ],
+      "new_character_path": "PASS",
+      "saved_character_path": "PASS",
+      "display_name_unchanged": "PASS",
+      "image_decoding": "PASS",
+      "inventory_fix_loaded": "PASS",
+      "phone_visual_test": "NOT_RUN"
+    },
+    "font_engine_test.json": {
+      "checks": [
+        {
+          "original": [
+            "gui/fonts/rog.ttf",
+            false,
+            false
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            false,
+            false
+          ]
+        },
+        {
+          "original": [
+            "gui/fonts/rog.ttf",
+            false,
+            true
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            false,
+            true
+          ]
+        },
+        {
+          "original": [
+            "gui/fonts/rog.ttf",
+            true,
+            false
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            true,
+            false
+          ]
+        },
+        {
+          "original": [
+            "gui/fonts/rog.ttf",
+            true,
+            true
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            true,
+            true
+          ]
+        },
+        {
+          "original": [
+            "gui/fonts/normie.ttf",
+            false,
+            false
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            false,
+            false
+          ]
+        },
+        {
+          "original": [
+            "gui/fonts/normie.ttf",
+            false,
+            true
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            false,
+            true
+          ]
+        },
+        {
+          "original": [
+            "gui/fonts/normie.ttf",
+            true,
+            false
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            true,
+            false
+          ]
+        },
+        {
+          "original": [
+            "gui/fonts/normie.ttf",
+            true,
+            true
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            true,
+            true
+          ]
+        },
+        {
+          "original": [
+            "gui/fonts/normie thicc.ttf",
+            false,
+            false
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            false,
+            false
+          ]
+        },
+        {
+          "original": [
+            "gui/fonts/normie thicc.ttf",
+            false,
+            true
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            false,
+            true
+          ]
+        },
+        {
+          "original": [
+            "gui/fonts/normie thicc.ttf",
+            true,
+            false
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            true,
+            false
+          ]
+        },
+        {
+          "original": [
+            "gui/fonts/normie thicc.ttf",
+            true,
+            true
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            true,
+            true
+          ]
+        },
+        {
+          "original": [
+            "gui/fonts/moid.ttf",
+            false,
+            false
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            false,
+            false
+          ]
+        },
+        {
+          "original": [
+            "gui/fonts/moid.ttf",
+            false,
+            true
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            false,
+            true
+          ]
+        },
+        {
+          "original": [
+            "gui/fonts/moid.ttf",
+            true,
+            false
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            true,
+            false
+          ]
+        },
+        {
+          "original": [
+            "gui/fonts/moid.ttf",
+            true,
+            true
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            true,
+            true
+          ]
+        },
+        {
+          "original": [
+            "gui/fonts/moid thicc.ttf",
+            false,
+            false
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            false,
+            false
+          ]
+        },
+        {
+          "original": [
+            "gui/fonts/moid thicc.ttf",
+            false,
+            true
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            false,
+            true
+          ]
+        },
+        {
+          "original": [
+            "gui/fonts/moid thicc.ttf",
+            true,
+            false
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            true,
+            false
+          ]
+        },
+        {
+          "original": [
+            "gui/fonts/moid thicc.ttf",
+            true,
+            true
+          ],
+          "resolved": [
+            "gui/fonts/ChineseUI.ttc",
+            true,
+            true
+          ]
+        }
+      ],
+      "glyph_generation": "PASS",
+      "gui_defaults": "PASS"
+    },
+    "payload_validation.json": {
+      "patch_sha256": "331f04b9b59fc5b4b98b717b4e495a565494950638d238a4e4eaa337ee1f9659",
+      "patch_size": 16943088,
+      "files": 232,
+      "rpyc_files": 231,
+      "expression_hashes_verified": 23165,
+      "zip_crc": "PASS",
+      "path_safety": "PASS",
+      "no_test_files": "PASS"
+    },
+    "resource_changes.json": {
+      "game_image_and_audio_files_checked": 2464,
+      "added": [],
+      "removed": [],
+      "changed": []
+    },
+    "lint_comparison.json": {
+      "baseline_warning_lines": 20,
+      "current_warning_lines": 26,
+      "new_warning_kinds": [
+        "game/qa_inventory_fix.rpy:LINE The init priority (1201) is not in the -999 to 999 range.",
+        "game/qa_new_build.rpy:LINE The init priority (1202) is not in the -999 to 999 range.",
+        "game/qa_sprite_fix.rpy:LINE The init priority (1200) is not in the -999 to 999 range.",
+        "game/zzzzzzzz_fmg_inventory_fix.rpy:LINE The init priority (1100) is not in the -999 to 999 range.",
+        "game/zzzzzzzzz_fmg_sprite_fix.rpy:LINE The init priority (1110) is not in the -999 to 999 range.",
+        "game/zzzzzzzzzz_fmg_build1793629832_zh.rpy:LINE The init priority (1120) is not in the -999 to 999 range."
+      ],
+      "removed_warning_kinds": []
+    }
+  },
+  "published": false,
+  "phone_visual_test": "NOT_RUN",
+  "whole_game_playthrough": "NOT_RUN"
+}

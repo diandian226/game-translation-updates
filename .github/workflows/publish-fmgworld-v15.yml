@@ -1,0 +1,73 @@
+name: Publish FMGWorld build1793629832 Chinese patch15
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/publish-fmgworld-v15.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-fmgworld-channel
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Retrieve exact patch and verify signatures
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in assemble.py parts.json update.json catalog.json qa.json release-notes.md update-cert.der.b64 transfer.part00.b64 transfer.part01.b64 transfer.part02.b64 transfer.part03.b64 transfer.part04.b64 transfer.part05.b64 transfer.part06.b64; do
+            gh api "repos/$GITHUB_REPOSITORY/contents/updates/fmgworld-v15/$file?ref=$GITHUB_SHA" --jq .content | base64 --decode > "$file"
+          done
+          mkdir base
+          gh release download fmgworld-patch-v14 --pattern payload.zip --dir base
+          python3 assemble.py
+          base64 --decode update-cert.der.b64 > update-cert.der
+          openssl x509 -inform DER -in update-cert.der -pubkey -noout > public.pem
+          for name in update catalog; do
+            openssl dgst -sha256 -verify public.pem -signature "$name.sig" "$name.signed"
+          done
+      - name: Publish patch assets after download verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! gh release view fmgworld-patch-v15 >/dev/null 2>&1; then
+            gh release create fmgworld-patch-v15 payload.zip update.json qa.json --draft --prerelease --target "$GITHUB_SHA" --title 'FMGWorld 构建1793629832 · 汉化补丁15' --notes-file release-notes.md
+          fi
+          mkdir downloaded
+          gh release download fmgworld-patch-v15 --pattern payload.zip --pattern update.json --pattern qa.json --dir downloaded
+          for file in payload.zip update.json qa.json; do cmp "$file" "downloaded/$file"; done
+          gh release edit fmgworld-patch-v15 --draft=false --prerelease
+      - name: Enable new official build without altering previous builds
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json?ref=main" > current.json
+          python3 - <<'PY'
+          import json,base64
+          from pathlib import Path
+          response=json.loads(Path('current.json').read_text())
+          old_bytes=base64.b64decode(response['content'])
+          old=json.loads(base64.b64decode(json.loads(old_bytes)['signed_data']))
+          new_bytes=Path('catalog.json').read_bytes()
+          new=json.loads(base64.b64decode(json.loads(new_bytes)['signed_data']))
+          if old_bytes==new_bytes:
+              Path('skip-catalog.flag').write_text('already active')
+          else:
+              assert old['catalog_version']<new['catalog_version'],'Refuse stale catalogue'
+              old_versions={r['version_code']:r for r in old['versions']}
+              new_versions={r['version_code']:r for r in new['versions']}
+              assert all(new_versions.get(k)==v for k,v in old_versions.items()),'Would change existing game builds'
+              assert set(new_versions)-set(old_versions)=={1793629832}
+              request={'message':'Enable Chinese patch15 for FMGWorld build1793629832; preserve previous three build patches','branch':'main','sha':response['sha'],'content':base64.b64encode(new_bytes).decode()}
+              Path('request.json').write_text(json.dumps(request))
+          PY
+          if [ ! -f skip-catalog.flag ]; then
+            gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json" --input request.json >/dev/null
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/contents/catalogs/fmgworld.json?ref=main" --jq .content | base64 --decode > verified-catalog.json
+          cmp catalog.json verified-catalog.json
