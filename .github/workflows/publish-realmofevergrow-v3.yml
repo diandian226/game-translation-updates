@@ -63,3 +63,5 @@ jobs:
           cmp catalog.json verified-catalog.json
 
 # Retry with engine-specific Godot resource validation.
+
+# Exact transfer assembly and every Godot resource extension validated locally.
