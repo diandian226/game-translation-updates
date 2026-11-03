@@ -1,0 +1,16 @@
+{
+  "changed_files": [
+    "assets/zh/zh_ui.gd"
+  ],
+  "unchanged_other_entries": 219,
+  "tutorial_resource_keys_unchanged": true,
+  "new_translations": [
+    "Combat → 战斗",
+    "Crafting → 制作",
+    "Glyphs → 符文",
+    "TestTutorial → 测试教程",
+    "World → 世界"
+  ],
+  "engine_interaction_test": "NOT_RUN",
+  "device_test": "NOT_RUN"
+}
