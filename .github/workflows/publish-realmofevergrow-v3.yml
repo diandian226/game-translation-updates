@@ -61,3 +61,5 @@ jobs:
           gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/catalogs/realmofevergrow.json" --input request.json >/dev/null
           gh api "repos/$GITHUB_REPOSITORY/contents/catalogs/realmofevergrow.json?ref=main" --jq .content | base64 --decode > verified-catalog.json
           cmp catalog.json verified-catalog.json
+
+# Retry with engine-specific Godot resource validation.
