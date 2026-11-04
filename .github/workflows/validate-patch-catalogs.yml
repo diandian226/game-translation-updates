@@ -1,0 +1,42 @@
+name: Validate signed patch catalogues and history
+on:
+  push:
+    branches: [main]
+    paths: ['catalogs/**', 'scripts/catalogs/**', '.github/workflows/validate-patch-catalogs.yml']
+  pull_request:
+    paths: ['catalogs/**', 'scripts/catalogs/**', '.github/workflows/validate-patch-catalogs.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Recover previous signed catalogues for regression checks
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import os, re, subprocess
+          base=os.environ.get('BASE_SHA','')
+          previous=Path('.previous-catalogs');previous.mkdir()
+          if re.fullmatch(r'[0-9a-f]{40}',base) and set(base)!={'0'}:
+              for path in Path('catalogs').glob('*.json'):
+                  result=subprocess.run(['git','show',base+':'+path.as_posix()],capture_output=True)
+                  if result.returncode==0:(previous/path.name).write_bytes(result.stdout)
+          PY
+      - name: Verify outer signatures, exact original matching and release signatures
+        run: python scripts/catalogs/catalog_history.py verify catalogs/*.json --previous-directory .previous-catalogs
+      - name: Verify replay, tampering, downgrade and history-preservation rejection
+        run: python scripts/catalogs/test_catalog_history.py -v
