@@ -1,9 +1,11 @@
 {
   "package_name": "cn.fmg.patcher",
-  "version_code": 25,
-  "version_name": "0.25 万物生长领域识别修复版",
-  "size": 46708824,
-  "sha256": "e41801e9831a9e901eea61ba23dbfed3ecf6076704490b4fce03308b860927e1",
-  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.25/Game-Translator-0.25.apk",
-  "notes": "修复 Android 11 及以上系统无法识别已安装的万物生长领域官方版。增加官方包与汉化版的包可见性声明；保留 0.24 的游戏适配、补丁更新及原有功能。可覆盖安装旧工具，无需卸载。"
+  "version_code": 26,
+  "version_name": "0.26 界面改版",
+  "size": 46737576,
+  "sha256": "97d689ee147e1425650be67c9cd779e5d1765870e56454603534e084bdf6f20e",
+  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.26/Game-Translator-0.26.apk",
+  "mandatory": true,
+  "notes": "界面全新改版：去掉多余装饰，游戏卡显示游戏自己的图标，汉化进度分四步显示，汉化完成后直接显示中文版信息。新增汉化补丁修订选择，最新补丁有问题时可退回发布者认可的旧修订。生成的中文版桌面图标会加上“汉”字标记，方便和官方版区分。切换游戏改为底部面板，游戏较多时可搜索。按钮和开关加入回弹动效。新版本推送后更快收到提示：切回工具时也会检查更新。下载后覆盖安装工具，无需卸载，已有数据保留。",
+  "minimum_version_code": 26
 }
