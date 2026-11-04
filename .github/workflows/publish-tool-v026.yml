@@ -1,0 +1,94 @@
+name: Publish verified tool 0.26 mandatory update
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/publish-tool-v026.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-translation-tool
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Reconstruct and verify exact approved APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in delta.part000.b64 delta.part001.b64 delta.part002.b64 assemble_apk.py tool-update.json; do
+            gh api "repos/$GITHUB_REPOSITORY/contents/updates/tool-v0.26/$file?ref=$GITHUB_SHA" --jq .content | base64 --decode > "$file"
+          done
+          cat delta.part*.b64 | base64 --decode > delta.zip
+          mkdir base
+          gh release download tool-v0.25 --pattern Game-Translator-0.25.apk --dir base
+          python3 assemble_apk.py base/Game-Translator-0.25.apk delta.zip Game-Translator-0.26.apk
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          meta=json.loads(Path('tool-update.json').read_text())
+          apk=Path('Game-Translator-0.26.apk').read_bytes()
+          assert meta['package_name']=='cn.fmg.patcher' and meta['version_code']==26
+          assert meta['mandatory'] is True and meta['minimum_version_code']==26
+          assert len(apk)==meta['size'] and hashlib.sha256(apk).hexdigest()==meta['sha256']
+          PY
+          signer=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
+          "$signer" verify --print-certs Game-Translator-0.26.apk > signing-check.txt
+          cat signing-check.txt
+          grep -q 'certificate SHA-256 digest: 7159c75918c024efd60cec65a7bf65da56e95cf675580f72bfd377f9dd17c06f' signing-check.txt
+      - name: Preserve previous release assets
+        shell: bash
+        run: |
+          mkdir previous
+          if gh release view tool-v0.26 >/dev/null 2>&1; then
+            gh release download tool-v0.26 --pattern '*.apk' --pattern 'tool-update.json' --dir previous
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: previous-tool-v026-assets
+          path: previous/
+          if-no-files-found: ignore
+          retention-days: 30
+      - name: Publish release asset before enabling update channel
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > release-notes.md <<'EOF'
+          全新界面与汉化流程展示；支持选择发布者认可的历史补丁修订，保留本机导入、版本匹配和已有汉化功能。
+
+          本次为必须更新版本。请下载后覆盖安装工具，无需卸载，工具数据保留，不会改动已安装游戏的剧情与存档。
+
+          支持强制更新的客户端将阻止跳过更新；较早客户端只能通过其原有更新提示或手动下载安装升级。系统安装仍需用户确认。
+
+          APK 版本、签名、完整性已验证，手机端使用流程仍待实际设备测试。
+          EOF
+          if ! gh release view tool-v0.26 >/dev/null 2>&1; then
+            gh release create tool-v0.26 --draft --title '游戏汉化工具 V0.26 · 必须更新' --notes-file release-notes.md
+          fi
+          gh release upload tool-v0.26 Game-Translator-0.26.apk tool-update.json --clobber
+          mkdir verified
+          gh release download tool-v0.26 --pattern Game-Translator-0.26.apk --pattern tool-update.json --dir verified
+          cmp Game-Translator-0.26.apk verified/Game-Translator-0.26.apk
+          cmp tool-update.json verified/tool-update.json
+          gh release edit tool-v0.26 --title '游戏汉化工具 V0.26 · 必须更新' --notes-file release-notes.md --draft=false --prerelease=false --latest=false
+      - name: Enable mandatory tool update after download verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/contents/tool-update.json?ref=main" > previous-channel-api.json
+          python3 - <<'PY'
+          import base64,json
+          from pathlib import Path
+          api=json.loads(Path('previous-channel-api.json').read_text())
+          current=json.loads(base64.b64decode(api['content']))
+          assert current['version_code']<=26,'A newer tool is already published; do not roll back'
+          meta=Path('tool-update.json').read_bytes()
+          Path('channel-request.json').write_text(json.dumps({'message':'Enable verified V0.26 mandatory tool update','sha':api['sha'],'content':base64.b64encode(meta).decode()}))
+          PY
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/tool-update.json" --input channel-request.json >/dev/null
+          gh api "repos/$GITHUB_REPOSITORY/contents/tool-update.json?ref=main" --jq .content | base64 --decode > verified-channel.json
+          cmp tool-update.json verified-channel.json
