@@ -1,10 +1,1 @@
-【平行宇宙安卓汉化补丁 v1 已发布】
-新版工具0.23已新增“平行宇宙”选项，并内置约7.6MB中文补丁。
-使用：升级工具 → 选择平行宇宙 → 导入官方APK → 使用对应补丁 → 生成并安装中文版。
-补丁发布页：https://github.com/diandian226/game-translation-updates/releases/tag/inaparalleluniverse-patch-v1
-仅发布汉化补丁和工具更新，不提供完整游戏APK。工具生成的中文版与官方版共存，官方私有存档不会自动迁移。
-
-
-【工具升级通知】请更新到 V0.25，升级后游戏列表会出现“万物生长领域”。点击“检查工具新版本”，下载并覆盖安装即可，原工具数据保留，无需卸载。
-工具下载：https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.23/Game-Translator-0.25.apk
-如果旧工具没有“检查工具新版本”功能，请手动下载上面的APK覆盖安装；游戏补丁更新不等于工具升级。
+我的claude被封了，现在暂停更新
