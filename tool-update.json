@@ -1,11 +1,11 @@
 {
   "package_name": "cn.fmg.patcher",
-  "version_code": 27,
-  "version_name": "0.27 Swole Blessings 测试适配",
-  "size": 46741916,
-  "sha256": "78b1d0750c06c2f5a49b34e7641a33256524ceaa1b516b0e3300bddd9a141322",
-  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.27/Game-Translator-0.27.apk",
+  "version_code": 28,
+  "version_name": "0.28 右下角汉字角标",
+  "size": 46750297,
+  "sha256": "301fec88a0a9ab44292dce48b60c69ec5380ea4e9428f9b55823970dd3c4a0cf",
+  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.28/Game-Translator-0.28.apk",
   "mandatory": false,
   "minimum_version_code": 26,
-  "notes": "新增 Swole Blessings 1.0.1 官方安卓包识别与中文测试补丁入口。采用用户提供的终审修正版，包含剧情、选项、界面及中文字体；按原包指纹匹配。保留 V0.26 界面和既有游戏。请覆盖安装工具，选择新游戏后导入官方包，再下载补丁并生成中文版。补丁编译、原包合并与签名检查通过，真机效果待测试。"
+  "notes": "把中文版图标的“汉”字标记缩小并移到右下角贴边；自适应图标按系统图标轮廓定位，避免标记被裁掉。工具里的中文版图标预览同步调整。保留V0.27游戏适配及已有功能。覆盖安装新版工具后，需重新生成并覆盖安装中文版，桌面图标才会更新。不同手机桌面的实际显示效果待测试。"
 }
