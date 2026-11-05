@@ -1,0 +1,73 @@
+name: Publish Swole Blessings opening language fix
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/publish-swoleblessings-v2.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-swoleblessings
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Reconstruct exact tested patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in delta.b64 assemble.py update.json catalog.json; do
+            gh api "repos/$GITHUB_REPOSITORY/contents/updates/swoleblessings-v2/$file?ref=$GITHUB_SHA" --jq .content | base64 -d > "$file"
+          done
+          mkdir base
+          gh release download swoleblessings-patch-v1 --pattern payload.zip --dir base
+          base64 -d delta.b64 > delta.zip
+          python3 assemble.py base/payload.zip delta.zip payload.zip
+          python3 - <<'PY'
+          import base64,hashlib,json,zipfile
+          from pathlib import Path
+          meta=json.loads(base64.b64decode(json.loads(Path('update.json').read_text())['signed_data']))
+          assert meta['version']==2 and meta['game']=='swoleblessings'
+          b=Path('payload.zip').read_bytes();assert len(b)==meta['patch_size'] and hashlib.sha256(b).hexdigest()==meta['patch_sha256']
+          with zipfile.ZipFile('payload.zip') as z,zipfile.ZipFile('base/payload.zip') as old:
+              assert set(z.namelist())==set(old.namelist())|{'assets/x-game/x-script.rpyc'}
+              for name in old.namelist():assert z.read(name)==old.read(name),name
+          PY
+      - name: Publish patch before enabling update
+        shell: bash
+        run: |
+          set -euo pipefail
+          notes='修复首次启动的语言选择菜单缺少中文：新增“简体中文”，选择后切换中文并保存语言选择。保留设置页中文入口及原有语言。适配同一1.0.1官方包；使用工具V0.27检查对应版本的补丁更新，下载“中文测试2”后重新生成并覆盖安装中文版，无需重新安装工具。原有译文、字体和资源逐字节保持一致，新增开场脚本已编译检查，尚待安卓真机测试。'
+          if ! gh release view swoleblessings-patch-v2 >/dev/null 2>&1; then
+            gh release create swoleblessings-patch-v2 --draft --title 'Swole Blessings 中文测试2 · 开场语言修复' --notes "$notes"
+          fi
+          gh release upload swoleblessings-patch-v2 payload.zip update.json --clobber
+          mkdir verified
+          gh release download swoleblessings-patch-v2 --pattern payload.zip --pattern update.json --dir verified
+          cmp payload.zip verified/payload.zip
+          cmp update.json verified/update.json
+          gh release edit swoleblessings-patch-v2 --draft=false --prerelease --latest=false --notes "$notes"
+      - name: Activate signed catalogue preserving previous patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/contents/catalogs/swoleblessings.json?ref=main" > current.json
+          python3 - <<'PY'
+          import base64,json
+          from pathlib import Path
+          api=json.loads(Path('current.json').read_text());old=json.loads(base64.b64decode(api['content']))
+          previous=json.loads(base64.b64decode(old['signed_data']))
+          new=json.loads(Path('catalog.json').read_text());data=json.loads(base64.b64decode(new['signed_data']))
+          assert previous['catalog_version']==1,'Catalogue changed since preparation; refusing stale update'
+          assert data['catalog_version']==2 and len(data['versions'])==len(previous['versions'])
+          assert data['versions'][0]['patch_history'][0]['release']==previous['versions'][0]['release']
+          assert data['versions'][0]['previous']==data['versions'][0]['patch_history']
+          Path('request.json').write_text(json.dumps({'message':'Enable Swole Blessings opening Chinese language fix','sha':api['sha'],'content':base64.b64encode(Path('catalog.json').read_bytes()).decode()}))
+          PY
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/catalogs/swoleblessings.json" --input request.json >/dev/null
+          gh api "repos/$GITHUB_REPOSITORY/contents/catalogs/swoleblessings.json?ref=main" --jq .content | base64 -d > catalogue-verified.json
+          cmp catalog.json catalogue-verified.json
