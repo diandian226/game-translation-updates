@@ -1,0 +1,68 @@
+name: Publish tool 0.28 corner badge fix
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/publish-tool-v028.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-translation-tool
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Reconstruct and verify exact signed APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in delta.part000.b64 delta.part001.b64 delta.part002.b64 assemble_apk.py tool-update.json; do
+            gh api "repos/$GITHUB_REPOSITORY/contents/updates/tool-v0.28/$file?ref=$GITHUB_SHA" --jq .content | base64 -d > "$file"
+          done
+          cat delta.part*.b64 | base64 -d > delta.zip
+          mkdir base
+          gh release download tool-v0.27 --pattern Game-Translator-0.27.apk --dir base
+          python3 assemble_apk.py base/Game-Translator-0.27.apk delta.zip Game-Translator-0.28.apk
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          meta=json.loads(Path('tool-update.json').read_text());b=Path('Game-Translator-0.28.apk').read_bytes()
+          assert meta['version_code']==28 and meta['package_name']=='cn.fmg.patcher'
+          assert len(b)==meta['size'] and hashlib.sha256(b).hexdigest()==meta['sha256']
+          PY
+          signer=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
+          "$signer" verify --print-certs Game-Translator-0.28.apk > signing.txt
+          grep -q 'certificate SHA-256 digest: 7159c75918c024efd60cec65a7bf65da56e95cf675580f72bfd377f9dd17c06f' signing.txt
+      - name: Publish downloadable APK before update channel
+        shell: bash
+        run: |
+          set -euo pipefail
+          notes='中文版图标的“汉”字标记缩小并移到右下角贴边；自适应图标按系统轮廓寻找最靠右下且不会裁掉标记的位置。工具内图标标记同步贴边。保留V0.27游戏适配。更新工具后，需要重新生成并覆盖安装中文版，桌面图标才会改变。构建及签名检查通过，手机桌面实际显示待测试。'
+          if ! gh release view tool-v0.28 >/dev/null 2>&1; then
+            gh release create tool-v0.28 --draft --title '游戏汉化工具 V0.28 · 汉字角标贴右下角' --notes "$notes"
+          fi
+          gh release upload tool-v0.28 Game-Translator-0.28.apk tool-update.json --clobber
+          mkdir verified
+          gh release download tool-v0.28 --pattern Game-Translator-0.28.apk --pattern tool-update.json --dir verified
+          cmp Game-Translator-0.28.apk verified/Game-Translator-0.28.apk
+          cmp tool-update.json verified/tool-update.json
+          gh release edit tool-v0.28 --draft=false --prerelease=false --latest=false --notes "$notes"
+      - name: Enable verified tool update
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/contents/tool-update.json?ref=main" > current.json
+          python3 - <<'PY'
+          import base64,json
+          from pathlib import Path
+          api=json.loads(Path('current.json').read_text());old=json.loads(base64.b64decode(api['content']))
+          assert old['version_code']<=28,'Refusing to replace a newer tool update'
+          Path('request.json').write_text(json.dumps({'message':'Enable tool 0.28 bottom-right badge update','sha':api['sha'],'content':base64.b64encode(Path('tool-update.json').read_bytes()).decode()}))
+          PY
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/tool-update.json" --input request.json >/dev/null
+          gh api "repos/$GITHUB_REPOSITORY/contents/tool-update.json?ref=main" --jq .content | base64 -d > verified-channel.json
+          cmp tool-update.json verified-channel.json
