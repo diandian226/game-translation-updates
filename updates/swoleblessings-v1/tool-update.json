@@ -1,0 +1,11 @@
+{
+  "package_name": "cn.fmg.patcher",
+  "version_code": 27,
+  "version_name": "0.27 Swole Blessings 测试适配",
+  "size": 46741916,
+  "sha256": "78b1d0750c06c2f5a49b34e7641a33256524ceaa1b516b0e3300bddd9a141322",
+  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.27/Game-Translator-0.27.apk",
+  "mandatory": false,
+  "minimum_version_code": 26,
+  "notes": "新增 Swole Blessings 1.0.1 官方安卓包识别与中文测试补丁入口。采用用户提供的终审修正版，包含剧情、选项、界面及中文字体；按原包指纹匹配。保留 V0.26 界面和既有游戏。请覆盖安装工具，选择新游戏后导入官方包，再下载补丁并生成中文版。补丁编译、原包合并与签名检查通过，真机效果待测试。"
+}

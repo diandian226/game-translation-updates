@@ -1,0 +1,111 @@
+name: Publish Swole Blessings test patch and tool 0.27
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/publish-swoleblessings-v1.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-translation-tool
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Reconstruct exact patch and signed tool without private keys
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="repos/$GITHUB_REPOSITORY/contents/updates/swoleblessings-v1"
+          gh api "$root/publication-files.json?ref=$GITHUB_SHA" --jq .content | base64 -d > publication-files.json
+          for file in $(python3 -c 'import json; print(" ".join(json.load(open("publication-files.json"))))') release-notes.md; do
+            gh api "$root/$file?ref=$GITHUB_SHA" --jq .content | base64 -d > "$file"
+          done
+          mkdir base
+          gh release download tool-v0.26 --pattern Game-Translator-0.26.apk --dir base
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import Path
+          with zipfile.ZipFile('base/Game-Translator-0.26.apk') as z:
+              Path('base/font-payload.zip').write_bytes(z.read('assets/payload.zip'))
+          PY
+          cat patch.delta.part*.b64 | base64 -d > patch-delta.zip
+          cat tool.delta.part*.b64 | base64 -d > tool-delta.zip
+          python3 assemble.py base/font-payload.zip patch-delta.zip payload.zip
+          python3 assemble.py base/Game-Translator-0.26.apk tool-delta.zip Game-Translator-0.27.apk
+          signer=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
+          "$signer" verify --print-certs Game-Translator-0.27.apk > signing.txt
+          grep -q 'certificate SHA-256 digest: 7159c75918c024efd60cec65a7bf65da56e95cf675580f72bfd377f9dd17c06f' signing.txt
+          python3 - <<'PY'
+          import base64,hashlib,json,zipfile
+          from pathlib import Path
+          patch=json.loads(base64.b64decode(json.loads(Path('update.json').read_text())['signed_data']))
+          catalogue=json.loads(base64.b64decode(json.loads(Path('catalog.json').read_text())['signed_data']))
+          assert patch['game']=='swoleblessings' and patch['min_tool']==27
+          assert patch['source_sha256']=='536092eea009bbd1dd3f3e2455c313798951c4326011a527d28818f357bda82b'
+          assert catalogue['versions'][0]['version_name']=='1.0.1' and catalogue['versions'][0]['version_code']==1791880663
+          assert catalogue['versions'][0]['release']==json.loads(Path('update.json').read_text())
+          for file,size,sha in [('payload.zip',patch['patch_size'],patch['patch_sha256']),('Game-Translator-0.27.apk',json.loads(Path('tool-update.json').read_text())['size'],json.loads(Path('tool-update.json').read_text())['sha256'])]:
+              b=Path(file).read_bytes();assert len(b)==size and hashlib.sha256(b).hexdigest()==sha
+          with zipfile.ZipFile('Game-Translator-0.27.apk') as z:
+              assert len(json.loads(z.read('assets/games.json')))==5
+              assert z.read('assets/catalog-swoleblessings.json')==Path('catalog.json').read_bytes()
+          PY
+      - name: Publish patch only and verify downloadable bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! gh release view swoleblessings-patch-v1 >/dev/null 2>&1; then
+            gh release create swoleblessings-patch-v1 --draft --title 'Swole Blessings 1.0.1 中文测试补丁1' --notes-file release-notes.md
+          fi
+          gh release upload swoleblessings-patch-v1 payload.zip update.json --clobber
+          mkdir patch-verified
+          gh release download swoleblessings-patch-v1 --pattern payload.zip --pattern update.json --dir patch-verified
+          cmp payload.zip patch-verified/payload.zip
+          cmp update.json patch-verified/update.json
+          gh release edit swoleblessings-patch-v1 --draft=false --prerelease --latest=false --notes-file release-notes.md
+      - name: Publish compatible tool before enabling channels
+        shell: bash
+        run: |
+          set -euo pipefail
+          notes='新增 Swole Blessings 1.0.1 中文测试补丁入口、官方包识别和独立中文包适配。保留V0.26界面及既有游戏。请覆盖安装工具，在新游戏选项下导入官方包并下载补丁，生成中文版后测试。工具与补丁的编译、签名及字节完整性验证通过，安卓真机效果尚待测试。'
+          if ! gh release view tool-v0.27 >/dev/null 2>&1; then
+            gh release create tool-v0.27 --draft --title '游戏汉化工具 V0.27 · Swole Blessings测试适配' --notes "$notes"
+          fi
+          gh release upload tool-v0.27 Game-Translator-0.27.apk tool-update.json --clobber
+          mkdir tool-verified
+          gh release download tool-v0.27 --pattern Game-Translator-0.27.apk --pattern tool-update.json --dir tool-verified
+          cmp Game-Translator-0.27.apk tool-verified/Game-Translator-0.27.apk
+          cmp tool-update.json tool-verified/tool-update.json
+          gh release edit tool-v0.27 --draft=false --prerelease --latest=false --notes "$notes"
+      - name: Activate catalogue and tool update after assets verified
+        shell: bash
+        run: |
+          set -euo pipefail
+          for pair in 'catalogs/swoleblessings.json:catalog.json' 'tool-update.json:tool-update.json'; do
+            remote="${pair%%:*}"; file="${pair#*:}"
+            sha=""
+            if gh api "repos/$GITHUB_REPOSITORY/contents/$remote?ref=main" > current.json 2>/dev/null; then
+              sha=$(python3 -c 'import json; print(json.load(open("current.json"))["sha"])')
+              if [ "$remote" = 'tool-update.json' ]; then
+                python3 - <<'PY'
+          import base64,json
+          assert json.loads(base64.b64decode(json.load(open('current.json'))['content']))['version_code']<=27,'A newer tool is published; refusing rollback'
+          PY
+              fi
+            fi
+            python3 - "$sha" "$file" <<'PY'
+          import base64,json,sys
+          from pathlib import Path
+          d={'message':'Enable verified Swole Blessings test patch and compatible tool','content':base64.b64encode(Path(sys.argv[2]).read_bytes()).decode()}
+          if sys.argv[1]:d['sha']=sys.argv[1]
+          Path('request.json').write_text(json.dumps(d))
+          PY
+            gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$remote" --input request.json >/dev/null
+            gh api "repos/$GITHUB_REPOSITORY/contents/$remote?ref=main" --jq .content | base64 -d > channel-verified.json
+            cmp "$file" channel-verified.json
+          done
