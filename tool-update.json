@@ -1,11 +1,11 @@
 {
   "package_name": "cn.fmg.patcher",
-  "version_code": 29,
-  "version_name": "0.29 公告弹窗",
-  "size": 46750297,
-  "sha256": "f0df4c64ffbdcc1b138e3e48b6414b87e5d416dd67456840376aef7c27400268",
-  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.29/Game-Translator-0.29.apk",
+  "version_code": 30,
+  "version_name": "0.30 女神制造者第二部",
+  "size": 46754619,
+  "sha256": "6212154d72cac6cc6a2e89c677a3e9a8d7a9bfd3b9b3c5bcd839a6e60eca4961",
+  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.30/Game-Translator-0.30.apk",
   "mandatory": false,
   "minimum_version_code": 26,
-  "notes": "我的claude被封了，现在暂停更新"
+  "notes": "新增女神制造者2.0.69第二部独立选项，支持导入新版官方APK并下载中文混合稿测试补丁。请先更新工具，再生成和安装中文版。此为提前试玩稿，尚未完成全量终审。"
 }
