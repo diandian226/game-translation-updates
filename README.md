@@ -17,7 +17,7 @@
 | 女神制造者（Outgrow） | 1.1.67 PartOne |
 | 万物生长领域（Realm of Evergrow） | 0.3.4.2 |
 | Swole Blessings | 1.0.1 |
-
+| musclesociety | 1.0|
 补丁按官方 APK 的**完整 SHA-256 和版本号**精确匹配。原包版本不对时，工具会拒绝打补丁，不会硬改。
 
 ## 下载工具
