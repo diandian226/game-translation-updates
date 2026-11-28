@@ -1,11 +1,11 @@
 {
   "package_name": "cn.fmg.patcher",
-  "version_code": 32,
-  "version_name": "0.32 湾岸学园",
-  "size": 46829758,
-  "sha256": "1803e09d01271107f86ad321ec39ad74aea718b18d85b307d71141a57190cc92",
-  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.32/Game-Translator-0.32.apk",
+  "version_code": 33,
+  "version_name": "0.33 阿斯基塔的生长药剂",
+  "size": 46838191,
+  "sha256": "526b2a3d8968afddb9a2030c07fd77d42f7c59a85a3523390d26536a2717d588",
+  "apk_url": "https://github.com/diandian226/game-translation-updates/releases/download/tool-v0.33/Game-Translator-0.33.apk",
   "mandatory": false,
   "minimum_version_code": 26,
-  "notes": "新增《湾岸学园 / Bayshore Academy》（0.16.5 / 游戏内 0.17.5，构建 3133279504）独立选项，支持导入官方原版 APK 并下载中文补丁（HY 初译 + Qwen 润色），生成独立中文版。请先更新工具，再导入原包生成和安装中文版。"
+  "notes": "新增《阿斯基塔的生长药剂 / Growth Potions》（1.1 构建 1755891202）独立选项，支持导入官方原版 APK 并下载中文补丁（HY 初译 + Qwen 润色），生成独立中文版。请先更新工具，再导入原包生成和安装中文版。"
 }
